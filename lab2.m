@@ -136,6 +136,8 @@ while(disable < 1)
     % in the fixed frame: x_vec = [1,0];
 
     % calling the controller (Task 1-3)
+    wr.speed_error_old = 0;
+    wr.cum_speed_error_int = 0;
     if mode_1
         wr.heading_dir = [1,0];
         wr = wr_control_heading(wr, time);

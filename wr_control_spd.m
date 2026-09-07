@@ -1,10 +1,22 @@
 function [wr] = wr_control_spd(wr, time)
-   % defalut values
+   % default values
     wr.DIRL = 1;
     wr.DIRR = 1;
-    PWML =0;
-    PWMR =0;
-    
+
+    Kp = ;
+    Ki = ;
+    Kd = ;
+
+    speed_error = wr.forward_spd - norm((wr.pos - wr.pos_old) / time.dt);
+    cum_speed_error_int = wr.cum_speed_error_int + speed_error * time.dt;
+    speed_error_der = (speed_error - wr.speed_error_old) / time.dt;
+
+    u_t = Kp * speed_error + Ki * cum_speed_error_int + Kd * speed_error_der;
+    PWML = u_t;
+    PWMR = u_t;
+
+    wr.cum_speed_error_int = cum_speed_error_int;
+    wr.speed_error_old = speed_error; 
 
     % setting the PWM limits, keep the codes here
     PWML = min(150, PWML);
