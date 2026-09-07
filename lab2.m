@@ -109,6 +109,11 @@ rData = QCM;
 wr.front_marker = rData(wr.findex,1:2); 
 wr.back_marker = rData(wr.bindex,1:2); 
 wr.pos_old = (wr.front_marker + wr.back_marker)/2;
+
+
+wr.dist_mar = 100;
+wr.fwd_deg = 15; % deg
+wr.curWP = 1; % initialized at 1st point
 tic
 while(disable < 1)
     wr.disable = disable; 
