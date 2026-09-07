@@ -115,6 +115,9 @@ wr.dist_mar = 100;
 wr.fwd_deg = 15; % deg
 wr.curWP = 1; % initialized at 1st point
 tic
+
+wr.speed_error_old = 0;
+wr.cum_speed_error_int = 0;
 while(disable < 1)
     wr.disable = disable; 
     time.curr = toc;  
