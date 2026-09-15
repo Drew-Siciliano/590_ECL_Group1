@@ -6,7 +6,8 @@ theta_plot = linspace(0,2*pi,1000);
 
 %% Waypoint Plot
 figure;
-data = readmatrix(data_prefix + "data_20260908_1436_waypoint_70.csv");
+%data = readmatrix(data_prefix + "data_20260908_1436_waypoint_70.csv");
+data = readmatrix(data_prefix + "data_20260908_1440_waypoint_200.csv");
 
 x_pos = data(:,2);
 y_pos = data(:,3);
