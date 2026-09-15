@@ -2,6 +2,9 @@ clear;
 close all;
 data_prefix = "lab02/lab_data/";
 
+theta_plot = linspace(0,2*pi,1000);
+
+%% Waypoint Plot
 figure;
 data = readmatrix(data_prefix + "data_20260908_1436_waypoint_70.csv");
 
@@ -12,18 +15,25 @@ waypoints = readmatrix("lab02/Rover_wp_lab2.xlsx");
 
 plot(x_pos,y_pos,'.')
 hold on
-scatter(waypoints(:, 1), waypoints(:, 2), "rd")
-viscircles(waypoints, 100*ones(length(waypoints), 1));
+plot(x_pos(1),y_pos(2),'g*','MarkerSize',12)
+hold on
+plot(waypoints(:, 1), waypoints(:, 2), "rx",'LineStyle','none','MarkerSize',12)
+r_deadzone = 100;
+for i = 1:size(waypoints,1)
+    hold on
+    plot(waypoints(i,1)+r_deadzone*cos(theta_plot),waypoints(i,2)+r_deadzone*sin(theta_plot),'r-','LineWidth',2)
+end
+
 axis equal
 grid minor
 xlabel("x [mm]")
 ylabel("y [mm]")
-legend(["Trajectory", "Waypoints"],'Location', 'southwest')
+legend(["Trajectory", "Start Location","Waypoints"],'Location', 'northeast')
 title("Waypoint Tracking")
 
 set(gca, 'FontSize', 16);
 
-% Speed plot
+%% Speed plot
 data = readmatrix(data_prefix + "data_20260908_1430_speed_70.csv");
 t = data(:, 1);
 x_pos = data(:,2);
