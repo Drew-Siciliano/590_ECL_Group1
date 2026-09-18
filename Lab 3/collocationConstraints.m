@@ -6,12 +6,12 @@ function [c_inequality, c_equality] = collocationConstraints(Z, vehicle_params, 
     L = vehicle_params.L; % Length between two wheels
 
     X0 = constraint_params.X0(:);
-    Xf = constraint_params.Xf(:);
+    r_target = constraint_params.r_target(:);
 
     r_ball = constraint_params.r_ball; % Radius of Ball
     pos_ball = constraint_params.pos_ball(:); % Position of Ball
 
-    % Extrac State Inputs
+    %% Extrac State Inputs
     Tf = Z(1);
     Z_state_control = Z(2:end);
     Z_state_control = reshape(Z_state_control, nx+nu, N_nodes);
@@ -43,7 +43,7 @@ function [c_inequality, c_equality] = collocationConstraints(Z, vehicle_params, 
     end
 
     %% Boundary Conditions
-    c_BC = [x(1);y(1);x(end);y(end)] - [X0;Xf];
+    c_BC = [x(1);y(1);theta(1);x(end);y(end)] - [X0;r_target];
 
     %% Ball Constraint
     c_ball = [];

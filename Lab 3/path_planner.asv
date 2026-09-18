@@ -41,12 +41,12 @@ function wr = path_planner(wr,obs_pos)
         constraint_params.X0 = [pos(:);theta];   % [x0; y0; theta0]
         constraint_params.r_target = pos_curWP(:);   % [xf; yf]
 
-        constraint_params.r_ball = 0.3 * 1000 + vehicle_params.L; % Radius of Ball (mm) with some margin for tank width
+        constraint_params.r_ball = 0.3 * 1000; % Radius of Ball (mm)
         constraint_params.pos_ball = obs_pos(:); % Position of Ball
 
         u_max = 150;
 
-        Z0_guess = generateReference(constraint_params.X0,constraint_params.r_target,N_nodes,u_max);
+        Z0_guess = generateReference();
         
         %% Constraints on Opt Variables
         Tf_min = Z0_guess(1)*0.9;
@@ -80,7 +80,7 @@ function wr = path_planner(wr,obs_pos)
                                 options);
 
         if exitflag <= 0
-            fprintf(" \n \n \n \n \nPlanner Failed \n \n \n \n \n")
+            fprintf(" \n \n \n \n \nCollo \n \n \n \n \n")
         end
 
         Z_state_control_opt = reshape(Z_opt(2:end),nx+nu,N_nodes);

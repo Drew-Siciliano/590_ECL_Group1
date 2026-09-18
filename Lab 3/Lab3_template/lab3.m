@@ -97,6 +97,14 @@ obs_first_marker = rData(obs_1index, 1:3);
 obs_second_marker = rData(obs_2index, 1:3);
 obs_pos_old = (obs_first_marker + obs_second_marker)/2;
 tic
+
+%%%%%%%%%%%%%%
+% Our Inputs
+wr.dist_mar = 100;
+wr.curWP = 1; % initialized at 1st point
+%%%%%%%%%%%%%%
+
+
 while(disable < 1)
     wr.disable = disable; 
     time.curr = toc;  
