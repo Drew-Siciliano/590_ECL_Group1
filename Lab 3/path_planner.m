@@ -16,6 +16,11 @@ function wr = path_planner(wr,obs_pos)
 
         ul = 0;
         ur = 0;
+    elseif obs_pos(3) > 200
+        %% 
+        fprintf(" \n \n \n \n \n Put down the obsticale reached \n \n \n \n \n")
+        ul = 0;
+        ur = 0;
     else
         options = optimoptions('fmincon', ...
             'Algorithm',              'sqp', ...
@@ -42,7 +47,7 @@ function wr = path_planner(wr,obs_pos)
         constraint_params.r_target = pos_curWP(:);   % [xf; yf]
 
         constraint_params.r_ball = 0.3 * 1000 + vehicle_params.L; % Radius of Ball (mm) with some margin for tank width
-        constraint_params.pos_ball = obs_pos(:); % Position of Ball
+        constraint_params.pos_ball = reshape(obs_pos(1:2),[],1); % Position of Ball
 
         u_max = 150;
 
