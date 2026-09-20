@@ -7,6 +7,7 @@ function wr = wr_control_heading(wr, time)
     Kp = -3.52208291564815;
     Ki = 1.25956669370519;
     Kd = 11.7688369455175;
+    N = 0.4;
 
     dt = time.dt;
     %% Calculate the angle remaining to face the waypoint
@@ -22,15 +23,25 @@ function wr = wr_control_heading(wr, time)
     % Error is desired heading minus actual heading.
     wr.e_heading = wrapTo180(target_heading - current_heading);
     e = wr.e_heading;
-    %% PID: convert heading error into a signed motor comman
+
+    %% PID: convert heading error into a signed motor command
     % Integral
     I = wr.e_heading_cum + e * dt;
-    % Derivative:
-    D = wrapTo180(e - wr.e_heading_old) / dt;
+
+    % Derivative
+    D = (wr.D_old + N * wrapTo180(e - wr.e_heading_old)) / (1 + N * dt);
+
     % Proportional
     u = Kp * e + Ki * I + Kd * D;
+
+    % Save PID states
+    wr.e_heading_cum = I;
+    wr.e_heading_old = e;
+    wr.D_old = D;
+
     % Clamp the actuator
     u = max(-150, min(150, u));
+
     %% Assign wheel directions
     % Positive u: left reverse, right forward.
     % Negative u: left forward, right reverse.
@@ -43,6 +54,7 @@ function wr = wr_control_heading(wr, time)
     % setting the PWM limits, keep the codes here
     PWML = min(150, PWML);
     wr.PWML = uint8(max(0, PWML));
+
     PWMR = min(150, PWMR);
     wr.PWMR = uint8(max(0, PWMR));
 end
