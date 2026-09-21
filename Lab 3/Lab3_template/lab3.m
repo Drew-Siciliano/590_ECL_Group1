@@ -137,7 +137,7 @@ while(disable < 1)
     % if heading error < 0, heading error is (-)
 
     % calling the controller (Implement your codes here)
-
+    wr = path_planner(wr,obs_pos);
 
 
 

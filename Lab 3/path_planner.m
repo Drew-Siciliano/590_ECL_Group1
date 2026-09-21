@@ -28,8 +28,7 @@ function wr = path_planner(wr,obs_pos)
             'MaxIterations',          1000, ...
             'MaxFunctionEvaluations', 2e5, ...
             'ConstraintTolerance',    1e-6, ...
-            'OptimalityTolerance',    1e-6, ...
-            'StepTolerance',          1e-10);
+            'OptimalityTolerance',    1e-6);
 
         %% Collocation Setup
         % State is Z = [Tf; reshape([x; y; theta; vr; vl], [], 1)];
@@ -92,6 +91,28 @@ function wr = path_planner(wr,obs_pos)
 
         vr = Z_state_control_opt(4,:);
         vl = Z_state_control_opt(5,:);
+
+        if 0 
+            %% debug plot
+            fig = figure(1000);
+            clf(fig)
+
+            xk = Z_state_control(1,:);
+            yk = Z_state_control(2,:);
+
+            plot(xk,yk,'k--*') % Optimized Path
+            hold on
+            plot(pos(1),pos(2),'g*') % Start
+            hold on
+            plot(pos_curWP(1),pos_curWP(2),'rx') % End
+            hold on
+
+            % Ball constraint
+            theta_plot = linspace(0,2*pi,1000);
+            plot(obs_pos(1)+constraint_params.r_ball*cos(theta_plot),obs_pos(2)+constraint_params.r_ball*sin(theta_plot),'r-')
+
+            axis equal
+        end
 
         % Get First control input
         ur = vr(1);
