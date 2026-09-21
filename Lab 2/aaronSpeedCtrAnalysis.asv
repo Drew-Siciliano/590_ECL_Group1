@@ -1,0 +1,69 @@
+clear;
+close all;
+clc;
+
+%% Import data
+data_prefix = "lab02/lab_data/";
+data = readmatrix(data_prefix + "data_20260908_1431_speed_120.csv");
+
+%% PID Gains
+Kp = 0.0496429912417118;
+Ki = 0.724718220063641;
+Kd = 0;
+
+%% Laplace variable
+s = tf('s');
+
+%% Speed transfer function
+Plant = (-11210 * s ^ 2 + 43120 * s + 60330) / ...
+        (s^3 + 961.2*s^2 + 17530*s + 17990);
+
+%% PID controller
+PID = Kp + Ki / s + Kd * s;
+
+%% Closed-loop transfer function
+Ts = feedback(PID * Plant, 1);
+
+%% Simulate unit step response
+figure
+step(Ts)
+grid on
+title('Closed-Loop Step Response')
+
+%% Step-response characteristics
+info = stepinfo(Ts);
+fprintf('Overshoot:          %.2f %%\n', info.Overshoot);
+fprintf('Settling Time:      %.4f s\n', info.SettlingTime);
+fprintf('Rise Time:          %.4f s\n', info.RiseTime);
+fprintf('Peak Time:          %.4f s\n', info.PeakTime);
+fprintf('Peak Value:         %.4f\n', info.Peak);
+
+%% Steady-state response
+yss = dcgain(Ts);
+ess = 1 - yss;
+fprintf('Steady-State Value: %.4f\n', yss);
+fprintf('Steady-State Error: %.4e\n', ess);
+
+%% Speed 120 analysis
+speed = 120;
+t = 0:0.001:5;
+
+[y, t] = step(speed * Ts, t);
+
+figure;
+plot(t, y, 'LineWidth', 1.5)
+hold on
+yline(speed, '--')
+grid on
+xlabel('Time [s]')
+ylabel('Speed')
+legend('Simulated Response', 'Command')
+
+info = stepinfo(y, t, 120);
+overshoot = info.Overshoot;
+settlingTime = info.SettlingTime;
+steadyStateError = 120 - y(end);
+
+fprintf('Overshoot: %.2f %%\n', overshoot);
+fprintf('Settling Time: %.4f s\n', settlingTime);
+fprintf('Steady-State Error: %.4f\n', steadyStateError);
