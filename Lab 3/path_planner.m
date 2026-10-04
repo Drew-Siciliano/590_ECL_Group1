@@ -1,11 +1,11 @@
-function wr = path_planner(wr,obs_pos)
+function [wr,WP,old_ref] = path_planner(wr,r_target,obs_pos,old_ref, fig_increment)
     %% Calc waypoint distances 
     heading_vec = wr.heading_vec;
     pos = wr.pos(:);
     theta = atan2(heading_vec(2), heading_vec(1)); % radians
 
     %% Distance to Waypoint
-    pos_curWP = wr.WP(wr.curWP,:).';
+    pos_curWP = r_target(:);
     vec_wr2WP = pos_curWP - pos;
     dist_curWP = norm(vec_wr2WP,2);
 
@@ -16,12 +16,19 @@ function wr = path_planner(wr,obs_pos)
 
         ul = 0;
         ur = 0;
+        WP = 0;
+        old_ref = [];
     elseif obs_pos(3) > 200
         %% 
         fprintf(" \n \n \n \n \n Put down the obsticale reached \n \n \n \n \n")
         ul = 0;
         ur = 0;
+        WP = 0;
+        old_ref = [];
     else
+
+        fprintf(" \n \n \n \n \n Running MPC \n \n \n \n \n")
+
         options = optimoptions('fmincon', ...
             'Algorithm',              'sqp', ...
             'Display',                'off', ...
@@ -33,7 +40,8 @@ function wr = path_planner(wr,obs_pos)
         %% Collocation Setup
         % State is Z = [Tf; reshape([x; y; theta; vr; vl], [], 1)];
 
-        N_nodes = 20;
+        N_nodes = 10;
+        %N_nodes = 20; % for data
         nx = 3;
         nu = 2;
 
@@ -51,6 +59,30 @@ function wr = path_planner(wr,obs_pos)
         u_max = 150;
 
         Z0_guess = generateReference(constraint_params.X0,constraint_params.r_target,N_nodes,u_max);
+
+        if 1 
+            %% debug plot
+            Z_state_control_opt = reshape(Z0_guess(2:end),nx+nu,N_nodes);
+            
+            fig = figure(1001);
+            clf(fig)
+
+            xk = Z_state_control_opt(1,:);
+            yk = Z_state_control_opt(2,:);
+
+            plot(xk,yk,'k--*') % Optimized Path
+            hold on
+            plot(pos(1),pos(2),'g*') % Start
+            hold on
+            plot(pos_curWP(1),pos_curWP(2),'rx') % End
+            hold on
+
+            % Ball constraint
+            theta_plot = linspace(0,2*pi,1000);
+            plot(obs_pos(1)+constraint_params.r_ball*cos(theta_plot),obs_pos(2)+constraint_params.r_ball*sin(theta_plot),'r-')
+
+            axis equal
+        end
         
         %% Constraints on Opt Variables
         Tf_min = Z0_guess(1)*0.9;
@@ -86,19 +118,22 @@ function wr = path_planner(wr,obs_pos)
         if exitflag <= 0
             fprintf(" \n \n \n \n \nPlanner Failed \n \n \n \n \n")
         end
+        old_ref = Z_opt;
 
         Z_state_control_opt = reshape(Z_opt(2:end),nx+nu,N_nodes);
 
+        WP = Z_state_control_opt(1:2,:).';
         vr = Z_state_control_opt(4,:);
         vl = Z_state_control_opt(5,:);
 
-        if 0 
+        if 1 
             %% debug plot
-            fig = figure(1000);
+            fig_num = 1000 + fig_increment;
+            fig = figure(fig_num);
             clf(fig)
 
-            xk = Z_state_control(1,:);
-            yk = Z_state_control(2,:);
+            xk = Z_state_control_opt(1,:);
+            yk = Z_state_control_opt(2,:);
 
             plot(xk,yk,'k--*') % Optimized Path
             hold on
@@ -109,9 +144,14 @@ function wr = path_planner(wr,obs_pos)
 
             % Ball constraint
             theta_plot = linspace(0,2*pi,1000);
-            plot(obs_pos(1)+constraint_params.r_ball*cos(theta_plot),obs_pos(2)+constraint_params.r_ball*sin(theta_plot),'r-')
+            plot(obs_pos(1)+constraint_params.r_ball*cos(theta_plot),obs_pos(2)+constraint_params.r_ball*sin(theta_plot),'r--')
+            plot(obs_pos(1)+(constraint_params.r_ball-vehicle_params.L)*cos(theta_plot),obs_pos(2)+(constraint_params.r_ball-vehicle_params.L)*sin(theta_plot),'r-')
 
             axis equal
+            title("Planned Path")
+            legend("Trajectory/Waypoints", "Start", "End", "Obstacle + margin", "Obstacle")
+            xlabel("x [mm]")
+            ylabel("y [mm]")
         end
 
         % Get First control input
@@ -120,8 +160,8 @@ function wr = path_planner(wr,obs_pos)
     end
 
     % setting the PWM limits and wheel directions
-    wr.DIRL = double(ul <= 0);
-    wr.DIRR = double(ur >= 0);
+    wr.DIRL = sign(ul);
+    wr.DIRR = sign(ur);
     
     PWML = abs(ul);
     PWMR = abs(ur);
