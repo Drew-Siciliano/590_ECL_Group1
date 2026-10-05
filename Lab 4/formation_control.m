@@ -38,4 +38,11 @@ function [wr, t2, t3, disable] = formation_control(wr, t2, t3, time, disable)
                 atan2(tauDot(3, 2), tauDot(3, 1))];
 
     %% Paste speed and heading code here
+
+    %% Disable
+    if norm(tau) < 5
+        disable = 1;
+    else
+        disable = 0;
+    end
 end
