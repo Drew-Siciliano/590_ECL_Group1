@@ -33,9 +33,7 @@ function [wr, t2, t3, disable] = formation_control(wr, t2, t3, time, disable)
 
     %% Convert Xdot Ydot to speed and headings
     speeds = [norm(tauDot(1, :)); norm(tauDot(2, :)); norm(tauDot(3, :))];
-    headings = [atan2(tauDot(1, 2), tauDot(1, 1)); ...
-                atan2(tauDot(2, 2), tauDot(2, 1)); ...
-                atan2(tauDot(3, 2), tauDot(3, 1))];
+    headings = 
 
-    %% Paste speed and heading code here
+    %% Convert robot Xdot Ydot into PWM wheel speeds and directions using old lab code
 end
