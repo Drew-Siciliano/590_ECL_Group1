@@ -23,25 +23,39 @@ function [wr, t2, t3, disable] = formation_control(wr, t2, t3, time, disable)
     
     %% Formation Control Law
     % robot locations 3x2 X, Y
-    x = [];
+    x = [wr.pos; t2.pos; t3.pos];
 
     % desired formation locations 3x2 X, Y
-    xi = [];
+    xi = [wr.WP; t2.WP; t3.WP];
     % define tau to be displacement of robot position from target location
     tau = x - xi;
     tauDot = - Lg * tau; % 3x2 matrix of Xdot, Ydot for 3 robots
 
     %% Convert Xdot Ydot to speed and headings
-    speeds = [norm(tauDot(1, :)); norm(tauDot(2, :)); norm(tauDot(3, :))];
-    headings = [atan2(tauDot(1, 2), tauDot(1, 1)); ...
-                atan2(tauDot(2, 2), tauDot(2, 1)); ...
-                atan2(tauDot(3, 2), tauDot(3, 1))];
+    % speeds = [norm(tauDot(1, :)); norm(tauDot(2, :)); norm(tauDot(3, :))];
+    % headings = [atan2(tauDot(1, 2), tauDot(1, 1)); ...
+    %             atan2(tauDot(2, 2), tauDot(2, 1)); ...
+    %             atan2(tauDot(3, 2), tauDot(3, 1))];
+    
+    %% Mapping from Xdot Ydot to PWM
+    % Compute V, velocity of robot
+    V = [atan2(tauDot(1, 2), tauDot(1, 1)); 
+         atan2(tauDot(2, 2), tauDot(2, 1));
+         atan2(tauDot(3, 2), tauDot(3, 1))];
+    % map V to PWM
+    PWM = 1.3027e-7 * V .^ 3 - 1.8165e-4 * V .^ 2 + 0.3162 * V + 2.4951;
 
-    %% Paste speed and heading code here
+    % set robot PWMs
+    wr.PWML = PWM(1);
+    wr.PWMR = PWM(1);
+    t2.PWML = PWM(2);
+    t2.PWMR = PWM(2);
+    t3.PWML = PWM(3);
+    t3.PWMR = PWM(3);
 
-    %% WR speed toggle
-
-    %% setting the PWM limits
+    % %% WR speed toggle
+    
+    % setting the PWM limits
     wr.PWML = min(150,  wr.PWML);
     wr.PWML = uint8(max(-150,  wr.PWML));
     wr.PWMR = min(150,  wr.PWMR);
@@ -56,7 +70,7 @@ function [wr, t2, t3, disable] = formation_control(wr, t2, t3, time, disable)
     t3.PWML = uint8(max(-150,  t3.PWML));
     t3.PWMR = min(150,  t3.PWMR);
     t3.PWMR = uint8(max(-150,  t3.PWMR));
-    
+
     %% Disable
     if norm(tau) < 5
         disable = 1;
