@@ -4,8 +4,8 @@ close all;
 set(0, 'DefaultLineLineWidth', 2);
 
 %data = readtable("mission_data\dataw1p5Follower.csv");
-data = readtable("mission_data\data1p5Follower2.csv");
-%data = readtable("mission_data\data1p5Follower3_distMarg10.csv");
+%data = readtable("mission_data\data1p5Follower2.csv");
+data = readtable("mission_data\data1p5Follower3_distMarg10.csv");
 
 tank1 = [data.Var2.';data.Var3.'];
 tank2 = [data.Var4.';data.Var5.'];
@@ -50,6 +50,15 @@ hold on
 plot(tank2_rel(1,end),tank2_rel(2,end),'LineStyle','none','Marker','x','MarkerSize',12,"Color",tank_color(2))
 hold on
 plot(0,0,'LineStyle','none','Marker','pentagram','MarkerSize',12,"Color",tank_color(3))
+hold on
+
+% Triangle
+L = 1000;
+h = sqrt(3)/2 * L;
+hold on
+plot([0, -L/2, L/2, 0], [0, -h, -h, 0], ...
+     '--', 'LineWidth', 2, 'Color', 'k')
+
 legend("Follower 1","Follower 1 @ t_f", ...
        "Follower 2","Follower 2 @ t_f", ...
        "Leader", ...
