@@ -20,10 +20,11 @@ L = [2, -1, -1; ...
 tau = [(x0-xf);(y0-yf)]';
 error(1) = 1;
 error(2) = rand*0.1;
-for i=1:300
-    if abs(error(end)-error(end-1))>0.001 %Define the convergence criterion
+for i=1:500
+%     if abs(error(end)-error(end-1))>0.001 %Define the convergence criterion
+    if abs(error(end))>0.0001 %Define the convergence criterion
         Xi(:,i)=tau+[xf;yf]';
-        error(i)=std(tau(1:3))+std(tau(3:end));
+        error(i)=std(tau(1:3))+std(tau(4:end));
         % run the Consensus Protocol 
         tau_dot = -[L,zeros(3,3);zeros(3,3),L]*tau';
         % update the states tau using RK44 integration
@@ -33,10 +34,20 @@ for i=1:300
         k3=dt*(-[L,zeros(3,3);zeros(3,3),L]*(tau'+k2/2));
         k4=dt*(-[L,zeros(3,3);zeros(3,3),L]*(tau'+k3));
         tau=tau+1/6*(k1'+2*k2'+2*k3'+k4');
+    else
+        disp(i)
     end
 end
+figure
 % Plot the trajectory
 for i=1:3
     plot(Xi(i,1:end),Xi(i+3,1:end),'*');
     hold on
 end
+grid on
+axis equal
+title("Formation Convergence")
+xlabel("x [m]")
+ylabel("y [m]")
+axis([-1, 1, -1, 1])
+legend("Rover 1", "Rover 2", "Rover 3")
