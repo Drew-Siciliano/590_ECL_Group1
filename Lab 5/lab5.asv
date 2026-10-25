@@ -1,0 +1,165 @@
+%% Starting Code
+clear; clc; close all;
+
+prompt_box = {'Enter Testing Mode: (heading, speed, waypoint)', ...
+              'Enter the Speed of the Probe (mm/s)   min: 10, max: 100'};
+dlgtitle = 'Probe Commands';
+dims = [1 70];
+definput = {'heading', '50'};
+answer = inputdlg(prompt_box, dlgtitle, dims, definput);
+if isempty(answer)
+    return;
+end
+
+check = 0;
+mode_1 = 0; mode_2 = 0; mode_3 = 0;
+if str2double(answer{2}) >= 10 && str2double(answer{2}) <= 100
+    check = check + 1;
+end
+if strcmpi(strtrim(answer{1}), 'heading')
+    check = check + 1;
+    mode_1 = 1;
+elseif strcmpi(strtrim(answer{1}), 'speed')
+    check = check + 1;
+    mode_2 = 1;
+elseif strcmpi(strtrim(answer{1}), 'waypoint')
+    check = check + 1;
+    mode_3 = 1;
+else
+    error('Enter appropriate testing mode!');
+end
+if check < 2
+    error('Check inputs! Enter inputs with appropriate ranges.');
+end
+
+vhc_param;
+pb.forward_spd = str2double(answer{2});
+pb.heading_rad = deg2rad(50);
+
+%% Setup QTM and Serial Communication
+QCM('connect', cfg.qtmHost, '6DEuler');
+qtmCleanup = onCleanup(@() QCM('disconnect'));
+
+labels = string(QCM('6doflabels'));
+pb.index = find(strcmpi(strtrim(labels), cfg.bodyName), 1);
+if isempty(pb.index)
+    error('Rigid body "%s" not found in QTM.', cfg.bodyName);
+end
+
+s = [];
+if cfg.hardwareEnabled
+    s = serialport(cfg.serialPort, cfg.baudRate, 'DataBits', 8, 'Timeout', 1);
+    serialCleanup = onCleanup(@() send_probe(s, zeros(1,8), 0));
+end
+
+%% Logfile Preparation
+if ~exist(cfg.logDir, 'dir')
+    mkdir(cfg.logDir);
+end
+file_name = fullfile(cfg.logDir, ...
+    ['data_' datestr(now,'yyyymmdd_HHMMSS') '.csv']);
+fid = fopen(file_name, 'w');
+if fid < 0
+    error('Could not open the data log.');
+end
+fileCleanup = onCleanup(@() fclose(fid));
+fprintf(fid, ['time[s],pb_x[mm],pb_y[mm],yaw[rad],speed[mm/s],' ...
+    'VALF,DIRF,VALR,DIRR,EDF0,EDF1,EDF2,EDF3,EDF4,EDF5,EDF6,EDF7\n']);
+
+%% Read QTM
+rData = QCM;
+pb.state = [rData(pb.index,1:2), deg2rad(rData(pb.index,6))];
+pb.state_old = pb.state;
+
+time.old = 0;
+loop = 1;
+disable = 0;
+tic;
+
+%% Main Loop
+
+docking = false;
+
+while disable < 1
+    pb.disable = disable;
+    rData = QCM;
+    time.curr = toc;
+    time.dt = time.curr - time.old;
+    if time.dt <= 0
+        continue;
+    end
+
+    pb.state = [rData(pb.index,1:2), deg2rad(rData(pb.index,6))];
+    speed = norm(pb.state(1:2) - pb.state_old(1:2)) / time.dt;
+
+    if mode_1
+        pb.heading_rad = 0;
+        pb = pb_control_heading(pb, time);
+    elseif mode_2
+        pb = pb_control_spd(pb, time);
+    else
+        if (norm([900 - pb.state(1), 900 - pb.state(2)]) < 40 && ~docking)
+            docking = true;
+        end
+        pb = pb_control_wp(pb, time, docking);
+    end
+
+    if mode_3 && pb.done
+        pb.VALF = 0;
+        pb.DIRF = 0;
+        pb.VALR = 0;
+        pb.DIRR = 0;
+        disable = 1;
+    end
+
+    pb.EDF_PWM = mixEDF(pb.VALF, pb.DIRF, pb.VALR, pb.DIRR);
+    if cfg.hardwareEnabled
+        send_probe(s, uint8(pb.EDF_PWM), 1);
+    end
+
+    data_to_log = [time.curr, pb.state, speed, ...
+                   pb.VALF, pb.DIRF, pb.VALR, pb.DIRR, pb.EDF_PWM];
+    fprintf(fid, [repmat('%.6f,',1,numel(data_to_log)-1), '%.6f\n'], data_to_log);
+
+    loop = loop + 1;
+    time.old = time.curr;
+    pb.state_old = pb.state;
+end
+
+%% Terminate
+if cfg.hardwareEnabled
+    send_probe(s, zeros(1,8), 0);
+end
+clear fileCleanup;
+disp('terminated');
+
+function edf = mixEDF(VALF, DIRF, VALR, DIRR)
+    edf = zeros(1,8);
+    if DIRF == 0
+        forwardIDs = [0 7];
+    else
+        forwardIDs = [3 4];
+    end
+    if DIRR == 0
+        rotationIDs = [0 2 4 6];
+    else
+        rotationIDs = [1 3 5 7];
+    end
+
+    if VALF > 0
+        edf(forwardIDs+1) = VALF;
+    else
+        edf(rotationIDs+1) = VALR;
+    end
+    edf = round(20 * edf);
+end
+
+function send_probe(s, edfPct, arm)
+    edfPct = max(0, min(100, edfPct));
+    roverID = 1;
+    packet = join(string([roverID, edfPct, arm]), ",");
+    
+    writeline(s, packet);
+    
+    fprintf("[ROVER TX] %s\n", packet);
+end

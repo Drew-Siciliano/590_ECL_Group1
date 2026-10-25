@@ -1,0 +1,24 @@
+function pb = pb_control_spd(pb, time)
+    % Add your controller here.
+    pb.VALF = 0;
+    pb.DIRF = 0;
+    pb.VALR = 0;
+    pb.DIRR = 0;
+
+    K = [1.0000, 0.0001];
+
+    % calculate current state and desired state
+    vx = (pb.state(1) - pb.state_old(1)) / time.dt;
+    vy = (pb.state(2) - pb.state_old(2)) / time.dt;
+
+    speed = norm([vx; vy]);
+    distance = norm([pb.state(1); pb.state(2)]);
+
+    x_current = [speed; distance];
+    x_desire = [pb.forward_spd; 1000];
+
+    controlInput = -K * (x_current - x_desire);
+
+    pb.VALF = abs(controlInput);
+    pb.DIRF = sign(controlInput);
+end

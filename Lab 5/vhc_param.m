@@ -1,0 +1,19 @@
+cfg.qtmHost = '127.0.0.1';
+cfg.bodyName = 'probe';
+cfg.hardwareEnabled = true;
+cfg.serialPort = 'COM3';
+cfg.baudRate = 57600;
+cfg.logDir = 'lab_data';
+
+pb = struct();
+pb.forward_spd = 0;
+pb.VALF = 0;
+pb.DIRF = 0;
+pb.VALR = 0;
+pb.DIRR = 0;
+pb.dock = [1000, 1000, deg2rad(90)];  % Rows: [x (mm), y (mm), angle (rad)]
+pb.heading_rad = 0;
+pb.done = false;
+pb.state = [NaN, NaN, NaN];
+pb.state_old = [NaN, NaN, NaN];
+pb.EDF_PWM = zeros(1,8);
