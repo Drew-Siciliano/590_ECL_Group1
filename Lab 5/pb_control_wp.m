@@ -7,7 +7,7 @@ pb.VALR = 0;
 pb.DIRR = 0;
 
 heading_dock_error = deg2rad(1);
-distanc_dock_error = 15;
+distanc_dock_error = 5;
 
 % if near dock, move slowly; else, move fast
 if (docking == true)
@@ -32,8 +32,20 @@ end
 dock_distance = norm([pb.dock(2) - pb.state(2), ...
     pb.dock(1) - pb.state(1)]);
 
-% if we are docked, exit
+% if we are close to docking, slow down
 if (heading_error < heading_dock_error && dock_distance < distanc_dock_error)
+    pb.forward_spd = 0;
+    pb = pb_control_spd(pb, time);
+end
+
+% calculate velocity at docking
+vx = (pb.state(1) - pb.state_old(1)) / time.dt;
+vy = (pb.state(2) - pb.state_old(2)) / time.dt;
+
+speed = vx * cos(pb.state(3)) + vy * sin(pb.state(3));
+
+% if docked, exit
+if (abs(speed) < 2)
     pb.done = true;
     return;
 end

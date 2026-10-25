@@ -6,7 +6,7 @@ pb.DIRF = 0;
 pb.VALR = 0;
 pb.DIRR = 0;
 
-heading_dock_error = deg2rad(10);
+heading_dock_error = deg2rad(1);
 distanc_dock_error = 15;
 
 % if near dock, move slowly; else, move fast
@@ -34,10 +34,13 @@ dock_distance = norm([pb.dock(2) - pb.state(2), ...
 
 % if we are docked, exit
 if (heading_error < heading_dock_error && dock_distance < distanc_dock_error)
+    pb.forward_spd = 0;
+    pb = pb_control_spd(pb, time);
     pb.done = true;
     return;
 end
 
+% make sure we dont translate until we stopped rotating
 theta = pb.state(3);
 thetaOld = pb.state_old(3);
 dtheta = theta - thetaOld;
@@ -52,7 +55,7 @@ omega = dtheta / time.dt;
 if (abs(heading_error) > heading_dock_error)
     pb.heading_rad = heading;
     pb = pb_control_heading(pb, time);
-elseif (omega < pi / 4)
+elseif (abs(omega) < pi / 4)
     pb.forward_spd = fwdspeed;
     pb = pb_control_spd(pb, time);
 end
