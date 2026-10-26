@@ -1,0 +1,37 @@
+clc; clear;
+%% speed
+A_speed = [0, 0; 1, 0];
+B_speed = [52.5431; 0];
+Q_speed = diag([1, 1e-10]);
+R_speed = 3;
+
+K_speed = lqr(A_speed, B_speed, Q_speed, R_speed);
+
+x_current_speed = [0; 0];
+x_desired_speed = [50; 1000];
+
+sys_speed = ss(A_speed - B_speed*K_speed, B_speed*K_speed, eye(2), 0);
+t_speed = linspace(0, 10, 1000);
+xd_speed = repmat(x_desired_speed', length(t_speed), 1);
+
+y_speed = lsim(sys_speed, xd_speed, t_speed, x_current_speed);
+%% heading
+A_heading = [0, 0; 1, 0];
+B_heading = [304.454685; 0];
+Q_heading = diag([0.1, 1]);
+R_heading = 5;
+
+K_heading = lqr(A_heading, B_heading, Q_heading, R_heading);
+
+x_current_heading = [0.5; deg2rad(150)];
+x_desired_heading = [0; deg2rad(300)];
+
+sys_heading = ss(A_heading - B_heading * K_heading, B_heading * K_heading, eye(2), 0);
+t_heading = linspace(0, 10, 1000);
+xd_heading = repmat(x_desired_heading', length(t_heading), 1);
+
+y_heading = lsim(sys_heading, xd_heading, t_heading, x_current_heading);
+
+
+
+
