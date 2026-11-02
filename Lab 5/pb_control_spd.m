@@ -4,7 +4,7 @@ function pb = pb_control_spd(pb, time)
     pb.DIRF = 0;
     pb.VALR = 0;
     pb.DIRR = 0;
-    if (pb.mode1)
+    if (pb.mode2)
         K = [0.5000    0.0000];
         x_desired = [pb.forward_spd; 0];
     else
@@ -16,13 +16,17 @@ function pb = pb_control_spd(pb, time)
     vx = (pb.state(1) - pb.state_old(1)) / time.dt;
     vy = (pb.state(2) - pb.state_old(2)) / time.dt;
     
-    speed = vx * cos(pb.state(3)) + vy * sin(pb.state(3));
-    distance = norm([pb.state(1); pb.state(2)]);
+    forward_dir = [cos(pb.state(3)); sin(pb.state(3))];
+    speed_body = forward_dir.' * [vx; vy];
 
-    x_current = [speed; distance];
+    distance_body = forward_dir.' * (pb.state(1:2) - pb.dock(1:2)).';
+    
+    % speed = vx * cos(pb.state(3)) + vy * sin(pb.state(3));
+    % distance = norm([pb.state(1); pb.state(2)]);
 
+    x_current = [speed_body; distance_body];
 
-    controlInput = K * (x_current - x_desired);
+    controlInput = -K * (x_current - x_desired);
 
     % control input
     pb.VALF = min(abs(controlInput), 1);

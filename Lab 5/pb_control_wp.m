@@ -42,9 +42,9 @@ vy = (pb.state(2) - pb.state_old(2)) / time.dt;
 
 speed = vx * cos(pb.state(3)) + vy * sin(pb.state(3));
 
-dock_distance2 = pb.state(1);
-% if we are close to docking, slow down
-if (dock_distance < distanc_dock_error && speed < 20)
+dock_head_error = wrapToPi(pb.dock(3) - pb.state(3));
+% if we are close to docking, stop 
+if (dock_distance < distanc_dock_error && abs(speed) < 20 && abs(dock_head_error) <= heading_dock_error)
     pb.forward_spd = 0;
     pb = pb_control_spd(pb, time);
     pb.done = true;
