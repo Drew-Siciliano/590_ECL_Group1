@@ -28,13 +28,14 @@ elseif strcmpi(strtrim(answer{1}), 'waypoint')
 else
     error('Enter appropriate testing mode!');
 end
+
 if check < 2
     error('Check inputs! Enter inputs with appropriate ranges.');
 end
 
 vhc_param;
 pb.forward_spd = str2double(answer{2});
-pb.heading_rad = deg2rad(50);
+pb.heading_rad = deg2rad(0);
 
 %% Setup QTM and Serial Communication
 QCM('connect', cfg.qtmHost, '6DEuler');
@@ -77,6 +78,10 @@ disable = 0;
 tic;
 
 %% Main Loop
+
+pb.mode1 = mode_1;
+pb.mode2 = mode_2;
+pb.mode3 = mode_3;
 
 docking = false;
 
