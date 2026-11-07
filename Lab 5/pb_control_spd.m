@@ -5,10 +5,10 @@ function pb = pb_control_spd(pb, time)
     pb.VALR = 0;
     pb.DIRR = 0;
     if (pb.mode2)
-        K = [0.5000    0.0000];
+        K = [0.5000    0.0000] * 5;
         x_desired = [pb.forward_spd; 0];
     else
-        K = [3.5382    0.5000];
+        K = [1.0134    0.7071] * 5;
         x_desired = [0; 0];
     end
 
@@ -20,11 +20,10 @@ function pb = pb_control_spd(pb, time)
     speed_body = forward_dir.' * [vx; vy];
 
     distance_body = forward_dir.' * (pb.state(1:2) - pb.dock(1:2)).';
-    
-    % speed = vx * cos(pb.state(3)) + vy * sin(pb.state(3));
-    % distance = norm([pb.state(1); pb.state(2)]);
 
     x_current = [speed_body; distance_body];
+
+    disp(speed_body)
 
     controlInput = -K * (x_current - x_desired);
 

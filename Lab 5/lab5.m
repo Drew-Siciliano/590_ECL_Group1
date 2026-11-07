@@ -103,11 +103,10 @@ while disable < 1
     elseif mode_2
         pb = pb_control_spd(pb, time);
     else
-        if (norm([900 - pb.state(1), 900 - pb.state(2)]) < 40)
-            docking = true;
-        end
-        pb = pb_control_wp(pb, time, docking);
+        [pb, docking] = pb_control_wp(pb, time, docking);
     end
+
+    disp(pb.state)
 
     if mode_3 && pb.done
         pb.VALF = 0;
