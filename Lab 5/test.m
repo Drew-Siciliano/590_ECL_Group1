@@ -27,7 +27,7 @@ y_speed = lsim(sys_speed, xd_speed, t_speed, x_current_speed);
 %% heading
 A_heading = [0, 0; 1, 0];
 B_heading = [304.454685; 0];
-Q_heading = diag([2, 1]);
+Q_heading = diag([4, 1]);
 R_heading = 1;
 
 K_heading = lqr(A_heading, B_heading, Q_heading, R_heading)
