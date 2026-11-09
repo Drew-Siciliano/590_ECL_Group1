@@ -129,8 +129,8 @@ function wr = chaser_Dan(wr,t2,time)
     end
     
     % Convert signed commands to direction and magnitude
-    wr.DIRL = uint8(pwm_left  >= 0);
-    wr.DIRR = uint8(pwm_right >= 0);
+    wr.DIRL = double(pwm_left  >= 0);
+    wr.DIRR = double(pwm_right >= 0);
     wr.PWML = abs(pwm_left);
     wr.PWMR = abs(pwm_right);
     
