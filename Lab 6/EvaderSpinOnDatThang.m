@@ -1,0 +1,51 @@
+function [wr, time] = EvaderSpinOnDatThang(wr, time)
+    wr.PWML = uint8(0);
+    wr.PWMR = uint8(0);
+    wr.DIRL = 1;
+    wr.DIRR = 1;
+
+    Kp = -3.52208291564815;
+    Ki = 1.25956669370519;
+    Kd = 11.7688369455175;
+
+    dt = time.dt;
+
+    % Actual heading is angle of the rover's measured heading vector.
+    wr.current_heading = atan2d(wr.heading_vec(2), wr.heading_vec(1));
+
+    % Desired heading is angle of the waypoint vector from the +x axis.
+    %% idk spin on dat thang should prob use chaser heading somehow to mess with them
+    target_heading = atan2d(wr.current_heading) + 180;
+
+    % Error is desired heading minus actual heading.
+    wr.e_heading = wrapTo180(target_heading - wr.current_heading);
+    if abs(wr.e_heading) >= wr.fwd_deg
+        e = wr.e_heading;
+        %% PID: convert heading error into a signed motor comman
+        % Integral
+        I = wr.e_heading_cum + e * dt;
+        % Derivative:
+        D = wrapTo180(e - wr.e_heading_old) / dt;
+        % Proportional
+        u = Kp * e + Ki * I + Kd * D;
+        % Clamp the actuator
+        u = max(-150, min(150, u));
+        %% Assign wheel directions
+        % Positive u: left reverse, right forward.
+        % Negative u: left forward, right reverse.
+        wr.DIRL = double(u <= 0);
+        wr.DIRR = double(u >= 0);
+    
+        PWML = abs(u);
+        PWMR = abs(u);
+    else
+        PWML = 0;
+        PWMR = 0;
+    end
+
+    % setting the PWM limits, keep the codes here
+    PWML = min(150, PWML);
+    wr.PWML = uint8(max(0, PWML));
+    PWMR = min(150, PWMR);
+    wr.PWMR = uint8(max(0, PWMR));
+end
