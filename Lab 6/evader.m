@@ -24,17 +24,27 @@ function t2 = evader(wr,t2,time)
     t2.vr = t2.old_vr;
     t2.vl = t2.old_vl;
     %% Select which chaser algo to use
-    evader = 1;
+    evader = 2;
 
-    if evader == 1
-        t2 = evader_Main(wr,t2,time);
-    elseif evader == 2
-        t2 = EvaderSpinOnDatThang(t2,time);
-    elseif evader == 3
-        t2 = EvaderOutsideLoop(t2,time);
+    if any(isnan(t2.pos))
+        disp("Evader is NaN")
     else
-        error('Unsupported evader algorithm: %d', evader);
+        if evader == 1
+            t2 = evader_Main(wr,t2,time);
+        elseif evader == 2
+            % t2 = EvaderSpinOnDatThang(t2,time);
+            t2.DIRR = 1;
+            t2.DIRL = 1;
+            t2.PWMR = 150;
+            t2.PWML = 90;
+        elseif evader == 3
+            t2 = EvaderOutsideLoop(t2,time);
+        else
+            error('Unsupported evader algorithm: %d', evader);
+        end
     end
+    % disp(t2.DIRL)
+    % disp(t2.DIRR)
     %% Print statements here for debugging
     fprintf("Evader heading is %d", t2.heading)
     %% Establish variables that are old now

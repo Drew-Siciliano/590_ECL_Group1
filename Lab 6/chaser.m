@@ -24,14 +24,18 @@ function wr = chaser(wr,t2,time)
     wr.vr = wr.old_vr;
     wr.vl = wr.old_vl;
     %% Select which chaser algo to use
-    chaser = 1;
+    chaser = 2;
 
-    if chaser == 1
-        wr = chaser_Main(wr,t2,time);
-    elseif chaser == 2
-        wr = chaser_Dan(wr,t2,time);
+    if any(isnan(wr.pos))
+        disp("Chaser is NaN")
     else
-        error('Unsupported chaser algorithm: %d', chaser);
+        if chaser == 1
+            wr = chaser_Main(wr,t2,time);
+        elseif chaser == 2
+            wr = chaser_Dan(wr,t2,time);
+        else
+            error('Unsupported chaser algorithm: %d', chaser);
+        end
     end
     %% Print statements here for debugging
     fprintf("Chaser heading is %d", wr.heading)

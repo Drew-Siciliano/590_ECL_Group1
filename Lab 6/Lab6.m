@@ -118,10 +118,12 @@ while(disable < 1)
     %% Chasing Algorithm
 
     wr = chaser(wr,t2,time);
+    % [wr,~] = debug_control(wr,t2,time);
     
     %% Evasion Algorithm
     
     t2 = evader(wr,t2,time);
+    % [~,t2] = debug_control(wr,t2,time);
 
     %% Check the validity of data
     if isnan(sum(wr.pos+t2.pos))
@@ -167,6 +169,17 @@ while(disable < 1)
     if targetz < 500
         disable = disable + 1;
     end
+
+    % t2.DIRR = 1;
+    % t2.DIRL = 0;
+    % t2.PWMR = 150;
+    % t2.PWML = 150;
+
+    disp("\n hi \n")
+    disp(t2.DIRL)
+    disp(t2.DIRR)
+    disp(t2.PWMR)
+    disp(t2.PWML)
     
     %--------------
     % Send the commands to each rover

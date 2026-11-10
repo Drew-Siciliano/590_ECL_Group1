@@ -9,16 +9,15 @@ function x = control_wp(x, time)
 
     % Heading
     wr_target_heading = atan2d(vec_wr2WP(2), vec_wr2WP(1));
-    current_heading = atan2d(x.heading_vec(2), x.heading_vec(1));
 
-    angle_curWP = wrapTo180(wr_target_heading - current_heading);
+    angle_curWP = wrapTo180(wr_target_heading - rad2deg(x.heading));
 
     if dist_curWP <= x.dist_mar
         %% Reached Waypoint
         fprintf(" \n \n \n \n \nWayPoint "+string(x.curWP)+" reached \n \n \n \n \n")
         x.curWP = x.curWP + 1;
 
-        x.current_heading = current_heading;
+        x.current_heading = rad2deg(x.heading);
 
         ul = 0;
         ur = 0;
@@ -35,13 +34,17 @@ function x = control_wp(x, time)
     else    
         if abs(angle_curWP) <= x.fwd_deg
             fprintf("\nSpeed\n")
-
+            disp(abs(angle_curWP))
             %% Reached Heading, Going Forwards
             x = control_spd(x, time);
+            x.DIRL = 1;
+            x.DIRR = 1;
+            x.PWML = 150;
+            x.PWMR = 150;
         else
             %% Control Heading
             fprintf("\nHeading\n")
-
+            disp(abs(angle_curWP))
             x = control_heading(x, time, angle_curWP);
         end
     end

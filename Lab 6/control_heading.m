@@ -20,10 +20,10 @@ function x = control_heading(x, time, target_heading)
     %target_heading = 0;
 
     % Actual heading is angle of the rover's measured heading vector.
-    x.current_heading = atan2d(x.heading_vec(2), x.heading_vec(1));
 
     % Error is desired heading minus actual heading.
-    x.e_heading = wrapTo180(target_heading - x.current_heading);
+    x.e_heading = wrapTo180(target_heading);
+    disp(x.e_heading)
     if abs(x.e_heading) >= x.fwd_deg
         e = x.e_heading;
         %% PID: convert heading error into a signed motor comman

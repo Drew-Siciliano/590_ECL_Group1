@@ -80,7 +80,7 @@ function wr = chaser_Main(wr,t2,time)
             end
         end
 
-        future_state = [wr.pos(1); wr.pos(2)] + [((wr.vr+wr.vl)/2) * cos(wr.heading); ((wr.vr+wr.vl)/2) * sin(wr.heading)] * time.dt * 1.25; % 1.25 for margin
+        future_state = [wr.pos(1); wr.pos(2)] + [((wr.vr+wr.vl)/2) * cos(wr.heading); ((wr.vr+wr.vl)/2) * sin(wr.heading)] * time.dt * 10; % 1.25 for margin
         if inpolygon(future_state(1), future_state(2), bounds(:, 1), bounds(:, 2))
             valid_control = true;
         else

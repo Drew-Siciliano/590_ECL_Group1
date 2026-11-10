@@ -81,15 +81,16 @@ function t2 = evader_Main(wr,t2,time)
         end
     end
     
-    future_state = [t2.pos(1); t2.pos(2)] + [((t2.vr+t2.vl)/2) * cos(t2.heading); ((t2.vr+t2.vl)/2) * sin(t2.heading)] * time.dt * 1.25; % 1.25 for margin
+    future_state = [t2.pos(1); t2.pos(2)] + [((t2.vr+t2.vl)/2) * cos(t2.heading); ((t2.vr+t2.vl)/2) * sin(t2.heading)] * time.dt * 100; % 1.25 for margin
     if ~inpolygon(future_state(1), future_state(2), bounds(:, 1), bounds(:, 2))
-        t2.PWML = uint8(50);
-        t2.PWMR = uint8(50);
+        t2.PWML = (150);
+        t2.PWMR = (150);
         t2.DIRL = 0;
         t2.DIRR = 1;
+        disp("GOING OUT")
     end
 
-    t2.PWMR = uint8(max(0,  t2.PWMR));
+    % t2.PWMR = uint8(max(0,  t2.PWMR));
 
     pwmr_cubic = [1.3027*10^(-7); -1.8165*10^(-4); 0.3162; 2.4951-double(t2.PWMR)];
     t2.vr = roots(pwmr_cubic); 

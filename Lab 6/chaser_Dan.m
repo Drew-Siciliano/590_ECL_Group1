@@ -1,6 +1,9 @@
 function wr = chaser_Dan(wr,t2,time)
+    % wr is chaster
+    % t2 is evader
+
     %% Tunables
-    algo_params.r_close = -inf;
+    algo_params.r_close = 500;
     algo_params.r_far = inf;
 
     % Turn angles (0 <= angle_fwd < angle_slide <= pi/2)
@@ -8,6 +11,8 @@ function wr = chaser_Dan(wr,t2,time)
     turn_params.angle_slide = deg2rad(45);
 
     turn_params.slide_ratio = 0.80;   % For Slide turns
+    u_max = 150;
+
     %% Arena Boundary
     boundary_point = [400,2200;
                       400,400;
@@ -15,7 +20,7 @@ function wr = chaser_Dan(wr,t2,time)
                       4400,1300;
                       4400,2200];
     boundary_point = boundary_point.';
-    
+
     %% Unpack State
     % Position
     r_evader = [t2.pos(1);t2.pos(2)];
@@ -23,8 +28,15 @@ function wr = chaser_Dan(wr,t2,time)
 
     r_evader_rel = r_evader - r_current;
     r_dist = norm(r_evader_rel,2);
-    
+
+    % Heading
+    % theta_current = atan2(wr.heading_vec(2),wr.heading_vec(1));
+    % theta_evader = atan2(t2.heading_vec(2),t2.heading_vec(1));
+    theta_current = wr.heading;
+    theta_evader = wr.evader_heading;
+
     r_evader_predict = r_evader; % Predict where the evader is based on speed?
+
     %% Chasing Algorithm
     fprintf("\n Chaser: ");
     if r_dist < algo_params.r_close
@@ -32,7 +44,7 @@ function wr = chaser_Dan(wr,t2,time)
         fprintf("Final Approach...");
 
         % Which one is better?
-        %r_target = r_evader; 
+        r_target = r_evader; 
         %r_target = r_evader_predict; 
 
     elseif algo_params.r_close <= r_dist && r_dist <= algo_params.r_far
@@ -47,11 +59,11 @@ function wr = chaser_Dan(wr,t2,time)
         n = r_rel/norm(r_rel,2);
 
         d = [-n(2); n(1)]; % Perp bisector vector
-    
+
         % Intersections with the polygon edges
         edge = boundary_point(:,[2:end,1]) - boundary_point;
         denominator = n.'*edge;
-    
+
         % Just in case if any edges are parallel
         valid = abs(denominator) > 1e-10; % Divide by 0 cases
 
@@ -59,11 +71,11 @@ function wr = chaser_Dan(wr,t2,time)
         numerator = n.'*(r_mid - boundary_point);
         s(valid) = numerator(valid)./denominator(valid); 
         valid = valid & s >= -1e-10 & s <= 1 + 1e-10; % Check for weird cases
-    
+
         if any(valid)
             s_valid = max(0,min(1,s(valid)));
             intersections = boundary_point(:,valid) + edge(:,valid).*s_valid;
-    
+
             lambda = d.'*(intersections - r_mid);
             r_target = r_mid + ((min(lambda) + max(lambda))/2)*d;
         else
@@ -76,11 +88,12 @@ function wr = chaser_Dan(wr,t2,time)
 
         r_target = r_evader;
     end
+
     %% Convert Target Position to Control Input
-    %r_target_rel = r_target - r_current;
-    %theta_target = atan2(r_target_rel(2),r_target_rel(1));
-    theta_target_rel = wrapToPi(wr.evader_heading - wr.heading);
-    
+    r_target_rel = r_target - r_current;
+    theta_target = atan2(r_target_rel(2),r_target_rel(1));
+    theta_target_rel = wrapToPi(theta_target - theta_current);
+
     % Forward or Reverse
     drive_direction = 1;
     if abs(theta_target_rel) > pi/2
@@ -89,31 +102,43 @@ function wr = chaser_Dan(wr,t2,time)
         theta_target_rel = wrapToPi(theta_target_rel - pi);
     end
     angle_error = abs(theta_target_rel);
-    
+
     % Signed wheel commands
-    pwm_drive = double(wr.u_max);
-    wr.PWML = drive_direction*pwm_drive;
-    wr.PWMR = drive_direction*pwm_drive;
-    
+    pwm_drive = double(u_max);
+    pwm_left  = drive_direction*pwm_drive;
+    pwm_right = drive_direction*pwm_drive;
+
     % Check if we need to turn
     if angle_error > turn_params.angle_slide
         fprintf("Turning\n");
 
         % Point Turn
-        wr.PWML  = -sign(theta_target_rel)*pwm_drive;
-        wr.PWMR = -wr.PWML;
+        pwm_left  = -sign(theta_target_rel)*pwm_drive;
+        pwm_right = -pwm_left;
     elseif angle_error > turn_params.angle_fwd
         fprintf("To Our Oblique\n");
 
         % Slide Turn
         if drive_direction*theta_target_rel > 0
-            wr.PWML  = drive_direction*turn_params.slide_ratio*pwm_drive;
-            wr.PWMR = drive_direction*pwm_drive;
+            pwm_left  = drive_direction*turn_params.slide_ratio*pwm_drive;
+            pwm_right = drive_direction*pwm_drive;
         else
-            wr.PWML  = drive_direction*pwm_drive;
-            wr.PWMR = drive_direction*turn_params.slide_ratio*pwm_drive;
+            pwm_left  = drive_direction*pwm_drive;
+            pwm_right = drive_direction*turn_params.slide_ratio*pwm_drive;
         end
     else
         fprintf("Dead Ahead\n");
     end
+
+    % Convert signed commands to direction and magnitude
+    wr.DIRL = double(pwm_left  >= 0);
+    wr.DIRR = double(pwm_right >= 0);
+    wr.PWML = abs(pwm_left);
+    wr.PWMR = abs(pwm_right);
+
+    %   setting the PWM limits
+    wr.PWML = min(150,  wr.PWML);
+    wr.PWML = uint8(max(0,  wr.PWML));
+    wr.PWMR = min(150,  wr.PWMR);
+    wr.PWMR = uint8(max(0,  wr.PWMR));
 end

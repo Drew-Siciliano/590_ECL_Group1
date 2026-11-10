@@ -2,7 +2,7 @@ function [t2, time] = EvaderOutsideLoop(t2, time)
     % This is literally just setting waypoints slightly inside the
     % boundaries of the loop and just following the waypoints
     % set waypoints in mm
-    offset = 100; % mm offset from corner
+    offset = 300; % mm offset from corner
     corner1 = [400 + offset, 2200 - offset]; 
     corner2 = [400 + offset, 400 + offset];
     corner3 = [3200 - offset, 400 + offset];
@@ -20,5 +20,5 @@ function [t2, time] = EvaderOutsideLoop(t2, time)
     t2 = control_wp(t2, time);
     
     % set last WP reached to 1 so we can reloop through this
-    t2.lastWPreached = 1;
+    % t2.lastWPreached = 1;
 end
