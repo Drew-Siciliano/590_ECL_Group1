@@ -33,6 +33,8 @@ function wr = chaser(wr,t2,time)
     else
         error('Unsupported chaser algorithm: %d', chaser);
     end
+    %% Print statements here for debugging
+    fprintf("Chaser heading is %d", wr.heading)
     %% Establish variables that are old now
     wr.old_vr = wr.vr;
     wr.old_vl = wr.vl;
