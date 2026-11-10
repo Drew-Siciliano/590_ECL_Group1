@@ -29,9 +29,19 @@ function wr = chaser_Dan(wr,t2,time)
     r_evader_rel = r_evader - r_current;
     r_dist = norm(r_evader_rel,2);
 
-    % Heading
-    theta_current = atan2(wr.heading_vec(2),wr.heading_vec(1));
-    theta_evader = atan2(t2.heading_vec(2),t2.heading_vec(1));
+    % Heading using front/back markers
+    % Chaser
+    chaserHeadingVector = [wr.front_marker(1) - wr.back_marker(1);
+        wr.front_marker(2) - wr.back_marker(2)];
+    theta_chaser = acos(dot(chaserHeadingVector, [1; 0])/(norm(chaserHeadingVector)*norm([1; 0])));
+    theta_chaser = wrapToPi(theta_chaser);
+    % Evader
+    evaderHeadingVector = [t2.front_marker(1) - t2.back_marker(1);
+        t2.front_marker(2) - t2.back_marker(2)];
+    theta_evader = atan2(evaderHeadingVector(2), evaderHeadingVector(1));
+    theta_evader = wrapToPi(theta_evader);
+    % theta_chaser = atan2(wr.heading_vec(2),wr.heading_vec(1));
+    % theta_evader = atan2(t2.heading_vec(2),t2.heading_vec(1));
     
     r_evader_predict = r_evader; % Predict where the evader is based on speed?
 
@@ -42,7 +52,7 @@ function wr = chaser_Dan(wr,t2,time)
         fprintf("Final Approach...");
 
         % Which one is better?
-        r_target = r_evader; 
+        %r_target = r_evader; 
         %r_target = r_evader_predict; 
 
     elseif algo_params.r_close <= r_dist && r_dist <= algo_params.r_far
@@ -88,9 +98,9 @@ function wr = chaser_Dan(wr,t2,time)
     end
 
     %% Convert Target Position to Control Input
-    r_target_rel = r_target - r_current;
-    theta_target = atan2(r_target_rel(2),r_target_rel(1));
-    theta_target_rel = wrapToPi(theta_target - theta_current);
+    %r_target_rel = r_target - r_current;
+    %theta_target = atan2(r_target_rel(2),r_target_rel(1));
+    theta_target_rel = wrapToPi(theta_evader - theta_chaser);
     
     % Forward or Reverse
     drive_direction = 1;
