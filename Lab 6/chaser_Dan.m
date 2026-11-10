@@ -1,7 +1,4 @@
 function wr = chaser_Dan(wr,t2,time)
-    % wr is chaster
-    % t2 is evader
-
     %% Tunables
     algo_params.r_close = -inf;
     algo_params.r_far = inf;
@@ -11,8 +8,6 @@ function wr = chaser_Dan(wr,t2,time)
     turn_params.angle_slide = deg2rad(45);
 
     turn_params.slide_ratio = 0.80;   % For Slide turns
-    u_max = 150;
-
     %% Arena Boundary
     boundary_point = [400,2200;
                       400,400;
@@ -28,23 +23,8 @@ function wr = chaser_Dan(wr,t2,time)
 
     r_evader_rel = r_evader - r_current;
     r_dist = norm(r_evader_rel,2);
-
-    % Heading using front/back markers
-    % Chaser
-    chaserHeadingVector = [wr.front_marker(1) - wr.back_marker(1);
-        wr.front_marker(2) - wr.back_marker(2)];
-    theta_chaser = acos(dot(chaserHeadingVector, [1; 0])/(norm(chaserHeadingVector)*norm([1; 0])));
-    theta_chaser = wrapToPi(theta_chaser);
-    % Evader
-    evaderHeadingVector = [t2.front_marker(1) - t2.back_marker(1);
-        t2.front_marker(2) - t2.back_marker(2)];
-    theta_evader = atan2(evaderHeadingVector(2), evaderHeadingVector(1));
-    theta_evader = wrapToPi(theta_evader);
-    % theta_chaser = atan2(wr.heading_vec(2),wr.heading_vec(1));
-    % theta_evader = atan2(t2.heading_vec(2),t2.heading_vec(1));
     
     r_evader_predict = r_evader; % Predict where the evader is based on speed?
-
     %% Chasing Algorithm
     fprintf("\n Chaser: ");
     if r_dist < algo_params.r_close
@@ -96,11 +76,10 @@ function wr = chaser_Dan(wr,t2,time)
 
         r_target = r_evader;
     end
-
     %% Convert Target Position to Control Input
     %r_target_rel = r_target - r_current;
     %theta_target = atan2(r_target_rel(2),r_target_rel(1));
-    theta_target_rel = wrapToPi(theta_evader - theta_chaser);
+    theta_target_rel = wrapToPi(wr.evader_heading - wr.heading);
     
     % Forward or Reverse
     drive_direction = 1;
@@ -112,7 +91,7 @@ function wr = chaser_Dan(wr,t2,time)
     angle_error = abs(theta_target_rel);
     
     % Signed wheel commands
-    pwm_drive = double(u_max);
+    pwm_drive = double(wr.u_max);
     pwm_left  = drive_direction*pwm_drive;
     pwm_right = drive_direction*pwm_drive;
     
@@ -137,16 +116,4 @@ function wr = chaser_Dan(wr,t2,time)
     else
         fprintf("Dead Ahead\n");
     end
-    
-    % Convert signed commands to direction and magnitude
-    wr.DIRL = double(pwm_left  >= 0);
-    wr.DIRR = double(pwm_right >= 0);
-    wr.PWML = abs(pwm_left);
-    wr.PWMR = abs(pwm_right);
-    
-    %   setting the PWM limits
-    wr.PWML = min(150,  wr.PWML);
-    wr.PWML = uint8(max(0,  wr.PWML));
-    wr.PWMR = min(150,  wr.PWMR);
-    wr.PWMR = uint8(max(0,  wr.PWMR));
 end
