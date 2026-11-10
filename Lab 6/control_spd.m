@@ -13,16 +13,9 @@ function x = control_spd(x, time)
     speed_error_der = (speed_error - x.speed_error_old) / time.dt;
 
     u_t = Kp * speed_error + Ki * cum_speed_error_int + Kd * speed_error_der;
-    PWML = u_t;
-    PWMR = u_t;
+    x.PWML = u_t;
+    x.PWMR = u_t;
 
     x.cum_speed_error_int = cum_speed_error_int;
     x.speed_error_old = speed_error; 
-
-    % setting the PWM limits, keep the codes here
-
-    PWML = min(150, PWML);
-    x.PWML = uint8(max(0, PWML));
-    PWMR = min(150, PWMR);
-    x.PWMR = uint8(max(0, PWMR));
 end

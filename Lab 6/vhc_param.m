@@ -52,7 +52,7 @@ t2.dangle_old = 0;
 t2.espd_old = 0;
 t2.espd_cum = 0;
 t2.pos = [0 0];
-t2.pos_old = [0 0 0];
+t2.pos_old = [0 0];
 
 t2.pgain_h = 0;
 t2.igain_h = 0;

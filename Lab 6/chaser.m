@@ -3,19 +3,26 @@ function wr = chaser(wr,t2,time)
     % wr is chaser
     % t2 is evader
     %% Establish variables for all codes
-    % Find headings
+    % Find headings [rads]
     % Chaser
-    chaserHeadingVector = [wr.front_marker(1) - wr.back_marker(1); wr.front_marker(2) - wr.back_marker(2)];
-    theta_chaser = acos(dot(chaserHeadingVector, [1; 0])/(norm(chaserHeadingVector)*norm([1; 0])));
+    chaserHeadingVector = [ ...
+        wr.front_marker(1) - wr.back_marker(1); ...
+        wr.front_marker(2) - wr.back_marker(2)];
+    theta_chaser = atan2( ...
+        chaserHeadingVector(2), ...
+        chaserHeadingVector(1));
     wr.heading = wrapToPi(theta_chaser);
     % Evader
-    evaderHeadingVector = [t2.front_marker(1) - t2.back_marker(1); t2.front_marker(2) - t2.back_marker(2)];
-    theta_evader = atan2(evaderHeadingVector(2), evaderHeadingVector(1));
+    evaderHeadingVector = [t2.front_marker(1) - t2.back_marker(1); ...
+        t2.front_marker(2) - t2.back_marker(2)];
+    theta_evader = atan2( ...
+        evaderHeadingVector(2), ...
+        evaderHeadingVector(1));
     wr.evader_heading = wrapToPi(theta_evader);
     % Find some other thing thats being recaculated
     wr.u_max = 150;
     wr.vr = wr.old_vr;
-    wr.vl = wl.old_vl;
+    wr.vl = wr.old_vl;
     %% Select which chaser algo to use
     chaser = 1;
 

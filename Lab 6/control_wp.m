@@ -42,7 +42,7 @@ function x = control_wp(x, time)
             %% Control Heading
             fprintf("\nHeading\n")
 
-            x = control_heading(x, time);
+            x = control_heading(x, time, angle_curWP);
         end
     end
 end
