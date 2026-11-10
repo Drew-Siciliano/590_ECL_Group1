@@ -92,26 +92,26 @@ function wr = chaser_Dan(wr,t2,time)
     
     % Signed wheel commands
     pwm_drive = double(wr.u_max);
-    pwm_left  = drive_direction*pwm_drive;
-    pwm_right = drive_direction*pwm_drive;
+    wr.PWML = drive_direction*pwm_drive;
+    wr.PWMR = drive_direction*pwm_drive;
     
     % Check if we need to turn
     if angle_error > turn_params.angle_slide
         fprintf("Turning\n");
 
         % Point Turn
-        pwm_left  = -sign(theta_target_rel)*pwm_drive;
-        pwm_right = -pwm_left;
+        wr.PWML  = -sign(theta_target_rel)*pwm_drive;
+        wr.PWMR = -wr.PWML;
     elseif angle_error > turn_params.angle_fwd
         fprintf("To Our Oblique\n");
 
         % Slide Turn
         if drive_direction*theta_target_rel > 0
-            pwm_left  = drive_direction*turn_params.slide_ratio*pwm_drive;
-            pwm_right = drive_direction*pwm_drive;
+            wr.PWML  = drive_direction*turn_params.slide_ratio*pwm_drive;
+            wr.PWMR = drive_direction*pwm_drive;
         else
-            pwm_left  = drive_direction*pwm_drive;
-            pwm_right = drive_direction*turn_params.slide_ratio*pwm_drive;
+            wr.PWML  = drive_direction*pwm_drive;
+            wr.PWMR = drive_direction*turn_params.slide_ratio*pwm_drive;
         end
     else
         fprintf("Dead Ahead\n");

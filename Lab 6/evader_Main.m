@@ -27,11 +27,9 @@ function t2 = evader_Main(wr,t2,time)
             K = t2.old_K;
             t2.time_since_gain = t2.time_since_gain + 1;
         end
-
-        % Match pursuer heading so move away
-        heading_chaser_rad = atan2(wr.heading_vec(2), wr.heading_vec(1));
-        error_state = [wr.pos(1); wr.pos(2); t2.heading] - [t2.pos(1); t2.pos(2); heading_chaser_rad];
-        error_state(3) = wrapToPi(t2.heading - heading_chaser_rad);
+        
+        error_state = [wr.pos(1); wr.pos(2); t2.heading] - [t2.pos(1); t2.pos(2); t2.chaser_heading];
+        error_state(3) = wrapToPi(t2.heading - t2.chaser_heading);
 
         u = -K * error_state;
         t2.vr = u(1);

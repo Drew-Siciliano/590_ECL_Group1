@@ -1,4 +1,4 @@
-function [x] = control_wp(x, time)
+function x = control_wp(x, time)
    
     %% Calc waypoint distances
     pos_curWP = x.WP(x.curWP,:); 
@@ -37,12 +37,12 @@ function [x] = control_wp(x, time)
             fprintf("\nSpeed\n")
 
             %% Reached Heading, Going Forwards
-            x = wr_control_spd(x, time);
+            x = control_spd(x, time);
         else
             %% Control Heading
             fprintf("\nHeading\n")
 
-            x = wr_control_heading(x, time);
+            x = control_heading(x, time);
         end
     end
 end

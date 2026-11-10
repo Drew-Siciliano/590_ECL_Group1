@@ -22,21 +22,18 @@ function t2 = evader(wr,t2,time)
     if evader == 1
         t2 = evader_Main(wr,t2,time);
     elseif evader == 2
-        t2 = EvaderSpinOnDatThang(wr,t2,time);
+        t2 = EvaderSpinOnDatThang(t2,time);
     elseif evader == 3
-        t2 = EvaderOutsideLoop(wr,t2,time);
+        t2 = EvaderOutsideLoop(t2,time);
     else
         error('Unsupported evader algorithm: %d', evader);
     end
     %% Establish variables that are old now
-    t2.old_vr = vr;
-    t2.old_vl = vl;
+    t2.old_vr = t2.vr;
+    t2.old_vl = t2.vl;
     %% Setting the PWM limits
     t2.PWML = min(150,  t2.PWML);
     t2.PWML = uint8(max(0,  t2.PWML));
     t2.PWMR = min(150,  t2.PWMR);
     t2.PWMR = uint8(max(0,  t2.PWMR));
-
-    t2.old_vr = vr;
-    t2.old_vl = vl;
 end

@@ -10,7 +10,7 @@ function [t2, time] = EvaderSpinOnDatThang(t2, time)
 
     % Desired heading is angle of the waypoint vector from the +x axis.
     %% idk spin on dat thang should prob use chaser heading somehow to mess with them
-    target_heading = atan2(t2.heading) + 180;
+    target_heading = t2.heading + pi;
 
     % Error is desired heading minus actual heading.
     t2.e_heading = wrapTo180(target_heading - t2.heading);
@@ -30,10 +30,10 @@ function [t2, time] = EvaderSpinOnDatThang(t2, time)
         % Negative u: left forward, right reverse.
         t2.DIRL = double(u <= 0);
         t2.DIRR = double(u >= 0);
-        PWML = abs(u);
-        PWMR = abs(u);
+        t2.PWML = abs(u);
+        t2.PWMR = abs(u);
     else
-        PWML = 0;
-        PWMR = 0;
+        t2.PWML = 0;
+        t2.PWMR = 0;
     end
 end

@@ -27,14 +27,11 @@ function wr = chaser(wr,t2,time)
         error('Unsupported chaser algorithm: %d', chaser);
     end
     %% Establish variables that are old now
-    wr.old_vr = vr;
-    wr.old_vl = vl;
+    wr.old_vr = wr.vr;
+    wr.old_vl = wr.vl;
     %% Setting the PWM limits
     wr.PWML = min(150,  wr.PWML);
     wr.PWML = uint8(max(0,  wr.PWML));
     wr.PWMR = min(150,  wr.PWMR);
     wr.PWMR = uint8(max(0,  wr.PWMR));
-
-    wr.old_vr = vr;
-    wr.old_vl = vl;
 end
