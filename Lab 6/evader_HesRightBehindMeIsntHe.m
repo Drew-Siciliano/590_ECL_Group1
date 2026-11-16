@@ -13,4 +13,4 @@ function t2 = evader_HesRightBehindMeIsntHe(wr,t2,time)
         t2.PWML = polyval([1.3027e-7, -1.8165e-4, 0.3162, 2.4951], t2.vl);
         t2.DIRR = 1;
         t2.DIRL = 1;
-end
+    end

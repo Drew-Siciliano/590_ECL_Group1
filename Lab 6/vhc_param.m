@@ -7,7 +7,7 @@ wr.disable = 0;
 % Mode
 wr.mode = 0;
 % forward angle [deg]
-wr.fwd_deg = 15;
+wr.fwd_deg = 10;
 % distance marin [mm]
 wr.dist_mar = 100;
 wr.curWP = 1;

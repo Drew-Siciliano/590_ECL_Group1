@@ -1,40 +1,22 @@
 function x = control_heading(x, time, target_heading)
+%
+% Inputs:
+%   x - robot struct
+%   time - time struct
+%   target_heading - Desired robot heading [radians]
+% 
     x.PWML = uint8(0);
     x.PWMR = uint8(0);
     x.DIRL = 1;
     x.DIRR = 1;
 
-    Kp = -3.52208291564815;
-    Ki = 1.25956669370519;
-    Kd = 11.7688369455175;
-    % Ki = 0;
-    % Kd = 0;
+    Kp = 3326.99627918386;
 
     dt = time.dt;
-    %% Calculate the angle remaining to face the waypoint
-    % pos_curWP = reshape(wr.WP(wr.curWP,:), 2, 1);
-    % vec_wr2WP = pos_curWP - wr.pos(:);
 
-    % Desired heading is angle of the waypoint vector from the +x axis.
-    % target_heading = atan2d(vec_wr2WP(2), vec_wr2WP(1));
-    %target_heading = 0;
-
-    % Actual heading is angle of the rover's measured heading vector.
-
-    % Error is desired heading minus actual heading.
-    x.e_heading = wrapTo180(target_heading);
-    disp(x.e_heading)
-    if abs(x.e_heading) >= x.fwd_deg
-        e = x.e_heading;
-        %% PID: convert heading error into a signed motor comman
-        % Integral
-        % I = wr.e_heading_cum + e * dt;
-        % Derivative:
-        x.e_heading_old = 0;
-        D = wrapTo180(e - x.e_heading_old) / dt;
-        % Proportional
-        % u = Kp * e + Ki * I + Kd * D;
-        u = Kp * e + Kd * D;
+    x.e_heading = wrapToPi(target_heading - x.heading); % [rads]
+    if abs(x.e_heading) >= deg2rad(x.fwd_deg)
+        u = Kp * x.e_heading;
         % Clamp the actuator
         u = max(-150, min(150, u));
         %% Assign wheel directions
