@@ -1,4 +1,5 @@
 %% Intializaion
+clear; clc
 
 vhc_param;
 L = 151.2;
@@ -164,5 +165,6 @@ xlim([0 4800])
 ylim([0 2600])
 grid on
 colormap(turbo)
-colorbar
+cb = colorbar;
+cb.Label.String = 'Time [s]';
 clim([min(time.history) max(time.history)])
