@@ -16,14 +16,14 @@ time.dt = 0.01;
 % WR settup
 wr.pos = [1000, 1300]; % Initial Pos [mm]
 wr.PWML = 0; wr.PWMR = 0;
-wr.heading = 0;
+wr.heading = pi/4;
 wr.front_marker = [wr.pos(1) + L*cos(wr.heading), wr.pos(2) + L*sin(wr.heading)];
 wr.back_marker = [wr.pos(1) - L*cos(wr.heading), wr.pos(2) - L*sin(wr.heading)];
 
 % T2 settup
 t2.pos = [2500, 1300]; % Initial Pos [mm]
 t2.PWML = 0; t2.PWMR = 0;
-t2.heading = pi;
+t2.heading = 0;
 t2.front_marker = [t2.pos(1) + L*cos(t2.heading), t2.pos(2) + L*sin(t2.heading)];
 t2.back_marker = [t2.pos(1) - L*cos(t2.heading), t2.pos(2) - L*sin(t2.heading)];
 
@@ -121,9 +121,6 @@ end
 %% Visualization
 
 figure
-tiledlayout(2,1)
-
-nexttile
 plot(time.history, wr.pos_history, 'LineWidth', 1.5)
 hold on
 plot(time.history, t2.pos_history, '--', 'LineWidth', 1.5)
@@ -133,9 +130,8 @@ ylabel('Position [mm]')
 legend('WR X', 'WR Y', 'T2 X', 'T2 Y', 'Location', 'best')
 grid on
 
-nexttile
+figure
 hold on
-
 c = time.history;
 c = c(:)';
 
@@ -158,7 +154,7 @@ surface([t2.pos_history(1, :) ; t2.pos_history(1, :)], ...
 x = [400 3200 4400 4400 400 400];
 y = [400 400 1300 2200 2200 400];
 pgon = polyshape(x, y);
-plot(pgon)
+plot(pgon, 'FaceColor', 'none', 'EdgeColor', 'blue')
 
 title('Rover X vs. Y over time')
 xlabel('X [mm]')
