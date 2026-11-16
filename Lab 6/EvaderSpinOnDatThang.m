@@ -15,8 +15,6 @@ function [t2, time] = EvaderSpinOnDatThang(t2, time)
     % Error is desired heading minus actual heading.
     t2.e_heading = wrapToPi(target_heading - t2.heading);
 
-    %%% I DONT KNOW WHAT t2.fwd_deg IS SO PROBABLY AN ERROR
-
     if abs(t2.e_heading) >= t2.fwd_deg
         e = t2.e_heading;
         %% PID: convert heading error into a signed motor comman

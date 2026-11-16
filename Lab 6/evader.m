@@ -24,7 +24,7 @@ function t2 = evader(wr,t2,time)
     t2.vr = t2.old_vr;
     t2.vl = t2.old_vl;
     %% Select which chaser algo to use
-    evader = 2;
+    evader = 4;
 
     if any(isnan(t2.pos))
         disp("Evader is NaN")
@@ -39,6 +39,8 @@ function t2 = evader(wr,t2,time)
             t2.PWML = 90;
         elseif evader == 3
             t2 = EvaderOutsideLoop(t2,time);
+        elseif evader == 4
+            t2 = evader_HesRightBehindMeIsntHe(wr, t2, time);
         else
             error('Unsupported evader algorithm: %d', evader);
         end
@@ -46,7 +48,7 @@ function t2 = evader(wr,t2,time)
     % disp(t2.DIRL)
     % disp(t2.DIRR)
     %% Print statements here for debugging
-    
+
     %% Establish variables that are old now
     t2.old_vr = t2.vr;
     t2.old_vl = t2.vl;

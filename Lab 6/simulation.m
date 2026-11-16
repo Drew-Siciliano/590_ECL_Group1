@@ -121,6 +121,8 @@ while (disable < 1)
 end
 %% Visualization
 
+fprintf("Total simulation time: %.2f\n", time.history(end))
+
 figure
 plot(time.history, wr.pos_history, 'LineWidth', 1.5)
 hold on
