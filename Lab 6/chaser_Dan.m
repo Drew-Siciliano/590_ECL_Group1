@@ -38,7 +38,7 @@ function wr = chaser_Dan(wr,t2,time)
     r_evader_predict = r_evader; % Predict where the evader is based on speed?
 
     %% Chasing Algorithm
-    fprintf("\n Chaser: ");
+    fprintf("\nChaser: ");
     if r_dist < algo_params.r_close
         %% Final Approach Algorithm 
         fprintf("Final Approach...");
@@ -110,13 +110,13 @@ function wr = chaser_Dan(wr,t2,time)
 
     % Check if we need to turn
     if angle_error > turn_params.angle_slide
-        fprintf("Turning\n");
+        fprintf("Turning");
 
         % Point Turn
         pwm_left  = -sign(theta_target_rel)*pwm_drive;
         pwm_right = -pwm_left;
     elseif angle_error > turn_params.angle_fwd
-        fprintf("To Our Oblique\n");
+        fprintf("To Our Oblique");
 
         % Slide Turn
         if drive_direction*theta_target_rel > 0
@@ -127,7 +127,7 @@ function wr = chaser_Dan(wr,t2,time)
             pwm_right = drive_direction*turn_params.slide_ratio*pwm_drive;
         end
     else
-        fprintf("Dead Ahead\n");
+        fprintf("Dead Ahead");
     end
 
     % Convert signed commands to direction and magnitude

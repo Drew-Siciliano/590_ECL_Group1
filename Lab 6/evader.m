@@ -46,7 +46,7 @@ function t2 = evader(wr,t2,time)
     % disp(t2.DIRL)
     % disp(t2.DIRR)
     %% Print statements here for debugging
-    fprintf("Evader heading is %d", t2.heading)
+    
     %% Establish variables that are old now
     t2.old_vr = t2.vr;
     t2.old_vl = t2.vl;

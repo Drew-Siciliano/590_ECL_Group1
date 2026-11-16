@@ -115,7 +115,7 @@ while (disable < 1)
     dis12 = sqrt((wr.pos(1)-t2.pos(1))^2+(wr.pos(2)-t2.pos(2))^2);
     if dis12<200
         disable = disable + 1;
-        disp('Chaser WINS');
+        fprintf('\nChaser WINS\n');
     end
 end
 %% Visualization
