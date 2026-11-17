@@ -1,5 +1,5 @@
 %% Intializaion
-clear; clc
+clear; clc;
 
 vhc_param;
 L = 151.2;
@@ -15,16 +15,16 @@ time.curr = 0;
 time.dt = 0.01;
 
 % WR settup
-wr.pos = [1000, 1300]; % Initial Pos [mm]
+wr.pos = [1500, 1300]; % Initial Pos [mm]
 wr.PWML = 0; wr.PWMR = 0;
-wr.heading = pi/4;
+wr.heading = 0;
 wr.front_marker = [wr.pos(1) + L*cos(wr.heading), wr.pos(2) + L*sin(wr.heading)];
 wr.back_marker = [wr.pos(1) - L*cos(wr.heading), wr.pos(2) - L*sin(wr.heading)];
 
 % T2 settup
-t2.pos = [2500, 1300]; % Initial Pos [mm]
+t2.pos = [3000, 1300]; % Initial Pos [mm]
 t2.PWML = 0; t2.PWMR = 0;
-t2.heading = 0;
+t2.heading = pi / 2;
 t2.front_marker = [t2.pos(1) + L*cos(t2.heading), t2.pos(2) + L*sin(t2.heading)];
 t2.back_marker = [t2.pos(1) - L*cos(t2.heading), t2.pos(2) - L*sin(t2.heading)];
 
@@ -44,8 +44,10 @@ while (disable < 1)
 
     % Chasing Algorithm
     wr = chaser(wr, t2, time);
+    %[wr,~] = debug_control(wr,t2,time);
     % Evasion Algorithm
     t2 = evader(wr, t2, time);
+    %[~,t2] = debug_control(wr,t2,time);
 
     devices.wr = wr; devices.t2 = t2;
     
@@ -94,22 +96,22 @@ while (disable < 1)
 
     % End simulation checks
     if wr.pos(1)<400 | wr.pos(1)>4400 | wr.pos(2)<400 | wr.pos(2)>2200
-        disp('WR is out of the boundary');
+        fprintf('\nWR is out of the boundary');
         disable = disable + 1;
     end
 
     if wr.pos(1)>3200 & (wr.pos(2)-400)/(wr.pos(1)-3200) < 0.75
-        disp('WR is out of the boundary');
+        fprintf('\nWR is out of the boundary');
         disable = disable + 1;
     end
     
     if t2.pos(1)<400 | t2.pos(1)>4400 | t2.pos(2)<400 | t2.pos(2)>2200
-        disp('T2 is out of the boundary');
+        fprintf('\nT2 is out of the boundary');
         disable = disable + 1;
     end
 
     if t2.pos(1)>3200 & (t2.pos(2)-400)/(t2.pos(1)-3200) < 0.75
-        disp('T2 is out of the boundary');
+        fprintf('\nT2 is out of the boundary');
         disable = disable + 1;
     end
     % Check if tag is achieved
@@ -118,11 +120,19 @@ while (disable < 1)
         disable = disable + 1;
         fprintf('\nChaser WINS\n');
     end
+    % Check if time has ellapsed
+    if time.curr >= 180
+        disable = disable + 1;
+        fprintf('\nEvader WINS')
+    end
 end
+
+
 %% Visualization
 
-fprintf("Total simulation time: %.2f\n", time.history(end))
+fprintf("\nTotal simulation time: %.2f\n", time.history(end))
 
+% Position vs. Time
 figure
 plot(time.history, wr.pos_history, 'LineWidth', 1.5)
 hold on
@@ -133,40 +143,83 @@ ylabel('Position [mm]')
 legend('WR X', 'WR Y', 'T2 X', 'T2 Y', 'Location', 'best')
 grid on
 
+%% XY Trajectories (colored by time)
 figure
 hold on
-c = time.history;
-c = c(:)';
 
-surface([wr.pos_history(1, :) ; wr.pos_history(1, :)], ...
-        [wr.pos_history(2, :) ; wr.pos_history(2, :)], ...
-        zeros(2, numel(c)), ...
-        [c ; c], ...
-        'FaceColor', 'none', ...
-        'EdgeColor', 'interp', ...
-        'LineWidth', 1.5)
+c = time.history(:)';
 
-surface([t2.pos_history(1, :) ; t2.pos_history(1, :)], ...
-        [t2.pos_history(2, :) ; t2.pos_history(2, :)], ...
-        zeros(2, numel(c)), ...
-        [c ; c], ...
-        'FaceColor', 'none', ...
-        'EdgeColor', 'interp', ...
-        'LineWidth', 1.5)
+% WR trajectory
+s1 = surface( ...
+    [wr.pos_history(1,:); wr.pos_history(1,:)], ...
+    [wr.pos_history(2,:); wr.pos_history(2,:)], ...
+    zeros(2, numel(c)), ...
+    [c; c], ...
+    'FaceColor', 'none', ...
+    'EdgeColor', 'interp', ...
+    'LineWidth', 1.5);
 
+% T2 trajectory
+s2 = surface( ...
+    [t2.pos_history(1,:); t2.pos_history(1,:)], ...
+    [t2.pos_history(2,:); t2.pos_history(2,:)], ...
+    zeros(2, numel(c)), ...
+    [c; c], ...
+    'FaceColor', 'none', ...
+    'EdgeColor', 'interp', ...
+    'LineWidth', 1.5);
+
+% Arena boundary
 x = [400 3200 4400 4400 400 400];
 y = [400 400 1300 2200 2200 400];
 pgon = polyshape(x, y);
 plot(pgon, 'FaceColor', 'none', 'EdgeColor', 'blue')
 
-title('Rover X vs. Y over time')
+% Formatting
+title('Rover X vs. Y over Time')
 xlabel('X [mm]')
 ylabel('Y [mm]')
 axis equal
 xlim([0 4800])
 ylim([0 2600])
 grid on
+
 colormap(turbo)
 cb = colorbar;
 cb.Label.String = 'Time [s]';
-clim([min(time.history) max(time.history)])
+clim([min(c) max(c)])
+
+% Custom data tips (Rover, X, Y, Time)
+dcm = datacursormode(gcf);
+set(dcm, 'UpdateFcn', @(~, evt) roverDataTip(evt, ...
+    s1, s2, wr.pos_history, t2.pos_history, c));
+
+function txt = roverDataTip(evt, s1, s2, wr_hist, t2_hist, t)
+
+    pos = evt.Position;
+
+    % Identify the selected rover
+    if isequal(evt.Target, s1)
+        hist = wr_hist;
+        name = 'Chaser';
+    elseif isequal(evt.Target, s2)
+        hist = t2_hist;
+        name = 'Evader';
+    else
+        txt = {'Arena boundary'};
+        return
+    end
+
+    % Find nearest recorded position
+    dist = hypot(hist(1,:) - pos(1), hist(2,:) - pos(2));
+    [~, idx] = min(dist);
+
+    % Display rover position and corresponding time
+    txt = {
+        ['Rover: ', name]
+        sprintf('X: %.1f mm', hist(1,idx))
+        sprintf('Y: %.1f mm', hist(2,idx))
+        sprintf('Time: %.2f s', t(idx))
+    };
+
+end

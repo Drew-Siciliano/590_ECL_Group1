@@ -18,9 +18,9 @@ function t2 = evader_Main(wr,t2,time)
             R = diag([1e-2, 1e-2]);
     
             % How slow is recomputing gains? :)
-            tic
+            % tic
             K = lqr(A, B, Q, R);
-            toc
+            % toc
             t2.old_K = K;
             t2.time_since_gain = 1;
         else

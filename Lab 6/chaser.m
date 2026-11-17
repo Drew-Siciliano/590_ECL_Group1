@@ -24,7 +24,7 @@ function wr = chaser(wr,t2,time)
     wr.vr = wr.old_vr;
     wr.vl = wr.old_vl;
     %% Select which chaser algo to use
-    chaser = 2;
+    chaser = 1;
 
     if any(isnan(wr.pos))
         disp("Chaser is NaN")
